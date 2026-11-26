@@ -1312,7 +1312,9 @@ def update_zallet_conf(datadir, validator_port, zallet_port, extra_args=None,
     # Params that update_zallet_conf knows how to apply. Any param set on
     # `extra_args` that is not authorized here is rejected rather than silently
     # ignored.
-    AUTHORIZED_PARAMS = {"activation_heights", "legacy_pool_seed_fingerprint"}
+    AUTHORIZED_PARAMS = {
+        "activation_heights", "legacy_pool_seed_fingerprint", "tx_expiry_delta",
+    }
     defaults = vars(ZalletArgs())
     provided = {k for k, v in vars(extra_args).items() if v != defaults.get(k)}
     assert provided <= AUTHORIZED_PARAMS, \
@@ -1328,6 +1330,10 @@ def update_zallet_conf(datadir, validator_port, zallet_port, extra_args=None,
     if extra_args.legacy_pool_seed_fingerprint:
         config_file.setdefault('features', {})['legacy_pool_seed_fingerprint'] = \
             extra_args.legacy_pool_seed_fingerprint
+
+    if extra_args.tx_expiry_delta is not None:
+        config_file.setdefault('builder', {})['tx_expiry_delta'] = \
+            extra_args.tx_expiry_delta
 
     with open(config_path, "w", encoding="utf8") as f:
         toml.dump(config_file, f)
@@ -1537,6 +1543,12 @@ INTERNAL_FEE = None
 # funds with at least this many confirmations. One is the usual choice: it takes
 # confirmed funds only, without waiting beyond a single block.
 MIN_CONFIRMATIONS = 1
+
+# The number of blocks after its target height at which a transaction expires
+# when the wallet has no expiry delta configured, on a chain where NU7 is not
+# active (ZIP 203, as changed by Blossom). Mirrors
+# `BLOSSOM_DEFAULT_TX_EXPIRY_DELTA` in zcash_primitives.
+DEFAULT_TX_EXPIRY_DELTA = 40
 
 # The `fromaddress` of z_sendmany that selects the legacy `zcashd` pool of funds:
 # spend non-coinbase UTXOs from any transparent address in it, rather than from

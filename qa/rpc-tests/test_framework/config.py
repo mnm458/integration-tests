@@ -99,6 +99,11 @@ class ZalletArgs:
     # restarts it with this set.
     legacy_pool_seed_fingerprint: str | None = None
 
+    # Sets zallet's `builder.tx_expiry_delta`: the number of blocks after its
+    # target height at which a transaction zallet builds expires. None leaves it
+    # unset, so zallet uses the network's default.
+    tx_expiry_delta: int | None = None
+
     def __add__(self, other):
         if other is None:
             return self
@@ -108,6 +113,8 @@ class ZalletArgs:
             self.activation_heights = other.activation_heights
         if other.legacy_pool_seed_fingerprint != defaults.legacy_pool_seed_fingerprint:
             self.legacy_pool_seed_fingerprint = other.legacy_pool_seed_fingerprint
+        if other.tx_expiry_delta != defaults.tx_expiry_delta:
+            self.tx_expiry_delta = other.tx_expiry_delta
         return self
 
 
